@@ -68,24 +68,11 @@
 			scaledImage = [self imageByScalingNotCroppingForSize:image toSize:targetSize];
 			data = UIImageJPEGRepresentation(scaledImage, self.quality/100.0f);
 		}
-		
-
-		NSString* docsPath = [NSTemporaryDirectory()stringByStandardizingPath];
-		NSError* err = nil;
-		NSFileManager* fileMgr = [[NSFileManager alloc] init];
-		NSString* filePath;
-
-		int i = 1;
-		do {
-			filePath = [NSString stringWithFormat:@"%@/%@%03d.%@", docsPath, CDV_PHOTO_PREFIX, i++, @"jpg"];
-		} while ([fileMgr fileExistsAtPath:filePath]);
-
-		if (![data writeToFile:filePath options:NSAtomicWrite error:&err]) {
-			result = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:[err localizedDescription]];
-			break;
-		} else {
-			[resultStrings addObject:[[NSURL fileURLWithPath:filePath] absoluteString]];
-		}
+        
+        NSString *encoded  = [data base64EncodedStringWithOptions:
+                              NSDataBase64Encoding64CharacterLineLength];
+        
+        [resultStrings addObject:encoded];
 	}
 	
 	if (nil == result) {
