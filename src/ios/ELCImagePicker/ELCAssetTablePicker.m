@@ -113,15 +113,32 @@
 }
 
 - (void)doneAction:(id)sender
-{	
-	NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
-	    
-	for (ELCAsset *elcAsset in self.elcAssets) {
-		if ([elcAsset selected]) {
-			[selectedAssetsImages addObject:[elcAsset asset]];
-		}
-	}
-    [self.parent selectedAssets:selectedAssetsImages];
+{
+    NSString *message = @"We are processing your images for upload.";
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Processing" message:message delegate:self cancelButtonTitle:nil otherButtonTitles:nil];
+    
+    UIActivityIndicatorView *progress = [[UIActivityIndicatorView alloc]
+                                         initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    progress.frame = CGRectMake(125,50,30,30);
+    
+    [alert setValue:progress forKey:@"accessoryView"];
+    
+    [alert show];
+    
+    NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [progress startAnimating];
+        for (ELCAsset *elcAsset in self.elcAssets) {
+            if ([elcAsset selected]) {
+                [selectedAssetsImages addObject:[elcAsset asset]];
+            }
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [alert dismissWithClickedButtonIndex:0 animated:YES];
+            [self.parent selectedAssets:selectedAssetsImages];
+        });
+    });
+    
 }
 
 
