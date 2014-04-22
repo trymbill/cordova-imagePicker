@@ -51,18 +51,6 @@
 
 
 - (void)elcImagePickerController:(ELCImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info {
-    NSString *message = @"We are processing your images for upload.";
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Processing" message:message delegate:self cancelButtonTitle:nil otherButtonTitles:nil];
-    UIActivityIndicatorView *progress= [[UIActivityIndicatorView alloc]
-                                        initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    
-    [alert setValue:progress forKey:@"accessoryView"];
-    [progress startAnimating];
-    
-    progress.frame = CGRectMake(125,50,30,30);
-    
-    [alert show];
-    
 	CDVPluginResult* result = nil;
 	NSMutableArray *resultStrings = [[NSMutableArray alloc] init];
 	NSString *url;
@@ -91,7 +79,6 @@
 		result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:resultStrings];
 	}
 
-    [alert dismissWithClickedButtonIndex:0 animated:YES];
 	[self.viewController dismissViewControllerAnimated:YES completion:nil];
 	[self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
 }
