@@ -22,42 +22,67 @@ public class ImagePicker extends CordovaPlugin {
     private CallbackContext callbackContext;
     private JSONObject params;
     
-	public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-	    this.callbackContext = callbackContext;
-	    this.params = args.getJSONObject(0);
-		if (action.equals("getPictures")) {
-			Intent intent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
-			int max = 20;
-			int desiredWidth = 0;
+  public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+      this.callbackContext = callbackContext;
+      this.params = args.getJSONObject(0);
+    if (action.equals("getPictures")) {
+      Intent intent = new Intent(cordova.getActivity(), MultiImageChooserActivity.class);
+      int max = 20;
+      int desiredWidth = 0;
             int desiredHeight = 0;
             int quality = 100;
-			if (this.params.has("maximumImagesCount")) {
-			    max = this.params.getInt("maximumImagesCount");
-			}
-			if (this.params.has("width")) {
-			    desiredWidth = this.params.getInt("width");
-			}
-			if (this.params.has("height")) {
-			    desiredWidth = this.params.getInt("height");
-			}
-			if (this.params.has("quality")) {
+      if (this.params.has("maximumImagesCount")) {
+          max = this.params.getInt("maximumImagesCount");
+      }
+      if (this.params.has("width")) {
+          desiredWidth = this.params.getInt("width");
+      }
+      if (this.params.has("height")) {
+          desiredWidth = this.params.getInt("height");
+      }
+      if (this.params.has("quality")) {
                 quality = this.params.getInt("quality");
             }
-			intent.putExtra("MAX_IMAGES", max);
-			intent.putExtra("WIDTH", desiredWidth);
-			intent.putExtra("HEIGHT", desiredHeight);
-			intent.putExtra("QUALITY", quality);
+      intent.putExtra("MAX_IMAGES", max);
+      intent.putExtra("WIDTH", desiredWidth);
+      intent.putExtra("HEIGHT", desiredHeight);
+      intent.putExtra("QUALITY", quality);
             if (this.cordova != null) {
                 this.cordova.startActivityForResult((CordovaPlugin) this, intent, 0);
             }
-		}
-		return true;
-	}
-	
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    }
+    return true;
+  }
+  
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK && data != null) {
             ArrayList<String> fileNames = data.getStringArrayListExtra("MULTIPLEFILENAMES");
-            JSONArray res = new JSONArray(fileNames);
+
+            ArrayList<String> encodedImages = new ArrayList<String>();
+            for(String fileName : fileNames) {
+              try {
+                Uri fileUri = Uri.parse(fileName);
+                InputStream inputStream = new FileInputStream(fileUri.getPath());
+                byte[] bytes;
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                try {
+                  while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    output.write(buffer, 0, bytesRead);
+                  }
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+                bytes = output.toByteArray();
+
+                String encodedString = Base64.encodeToString(bytes, Base64.DEFAULT);
+                encodedImages.add(encodedString);
+              } catch(FileNotFoundException fnfe) {
+              }
+            }
+
+            JSONArray res = new JSONArray(encodedImages);
             this.callbackContext.success(res);
         } else if (resultCode == Activity.RESULT_CANCELED) {
             JSONArray res = new JSONArray();
@@ -65,5 +90,5 @@ public class ImagePicker extends CordovaPlugin {
         } else {
             this.callbackContext.error("No images selected");
         }
-	}
+  }
 }
