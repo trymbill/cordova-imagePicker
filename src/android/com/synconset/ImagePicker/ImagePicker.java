@@ -6,6 +6,12 @@ package com.synconset;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +21,8 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
+import android.net.Uri;
+import android.util.Base64;
 
 public class ImagePicker extends CordovaPlugin {
     public static String TAG = "ImagePicker";
